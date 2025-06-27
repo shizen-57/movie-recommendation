@@ -120,13 +120,32 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# Project specific
+data/*.csv
+artifacts/*.pkl
+*.log
+temp/
+.streamlit/
 
-# Pyre type checker
-.pyre/
+# API Keys (important!)
+.env
+config.py
+*api_key*
+*API_KEY*
+
+# Large datasets
+data/ml-*
+data/tmdb_*
+*.zip
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Cache
+.cache/
+
+# Nested repository (already extracted)
+Movie-Recommender-System-Using-Machine-Learning/
 
 # if using pycharm
 .idea

@@ -1,5 +1,23 @@
-### dependency
+### Core dependencies
 streamlit
+pandas
+numpy
+requests
+Pillow
 
-### local packages -
--e . 
+### AI/ML dependencies  
+google-generativeai
+
+### Data processing
+scipy
+scikit-learn
+nltk
+
+### Visualization
+matplotlib
+seaborn
+plotly
+streamlit-option-menu
+
+### Utilities
+python-dotenv 
