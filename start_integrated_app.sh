@@ -21,24 +21,50 @@ fi
 echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 
-echo "📦 Installing Node.js dependencies..."
-cd frontend
-npm install
-
-echo "🔨 Building React frontend..."
-npm run build
-
-echo "🔙 Returning to root directory..."
-cd ..
+# Check if artifacts exist
+if [ ! -f "artifacts/movie_list.pkl" ]; then
+    echo "⚠️  Movie artifacts not found. Generating movie data..."
+    python data_loader.py
+fi
 
 echo "🤖 Setting up Gemini AI API key..."
 python set_api_key.py
 
-echo "🚀 Starting Flask server..."
-echo "📱 Frontend will be available at: http://localhost:5000"
-echo "🔌 API endpoints will be available at: http://localhost:5000/api"
-echo ""
-echo "🛑 Press Ctrl+C to stop the server"
-echo ""
+echo "🚀 Starting Flask backend server on port 8000..."
+python web_server.py &
+BACKEND_PID=$!
 
-python web_server.py
+# Wait for backend to start
+sleep 3
+
+echo "🎨 Starting React frontend development server..."
+cd frontend
+npm install
+npm run dev &
+FRONTEND_PID=$!
+
+# Wait for services to start
+sleep 5
+
+echo ""
+echo "✅ Application started successfully!"
+echo "🎥 Frontend App: http://localhost:5173"
+echo "🔌 Backend API: http://localhost:8000"
+echo ""
+echo "🛑 Press Ctrl+C to stop all services"
+
+# Function to cleanup processes
+cleanup() {
+    echo ""
+    echo "🛑 Stopping services..."
+    kill $BACKEND_PID 2>/dev/null
+    kill $FRONTEND_PID 2>/dev/null
+    echo "✅ All services stopped"
+    exit 0
+}
+
+# Trap Ctrl+C
+trap cleanup SIGINT
+
+# Wait for user to stop
+wait
