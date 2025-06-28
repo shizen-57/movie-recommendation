@@ -1,10 +1,11 @@
-# 🎬 CinemaAI Pro - Advanced Movie Recommendation System
+# 🎬 CinemaAI Pro - Advanced Movie Recommendation System with React Frontend
 
-A cutting-edge movie recommendation system powered by Machine Learning and Google's Gemini AI, featuring a beautiful dark-themed UI with Pinterest-style masonry grid layout.
+A cutting-edge movie recommendation system powered by Machine Learning and Google's Gemini AI, featuring a beautiful React.js frontend with modern UI/UX design.
 
 ![CinemaAI Pro](https://img.shields.io/badge/CinemaAI-Pro-blue?style=for-the-badge&logo=movie)
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg?style=for-the-badge&logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Flask](https://img.shields.io/badge/Flask-2.0+-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
 ## ✨ Features
@@ -15,49 +16,82 @@ A cutting-edge movie recommendation system powered by Machine Learning and Googl
 - **Personalized Suggestions**: AI learns from your favorites to provide tailored recommendations
 - **Contextual Understanding**: Describe what you want in plain English
 
-### 🎨 Modern UI/UX
-- **Pinterest-Style Layout**: Beautiful masonry grid displaying movie posters
-- **Pure Black Theme**: Elegant dark theme optimized for movie browsing
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
-- **Interactive Elements**: Hover effects, smooth transitions, and intuitive navigation
+### 🎨 Modern React Frontend
+- **Responsive Design**: Beautiful, modern UI built with React 18+ and SCSS
+- **Pinterest-Style Layout**: Elegant masonry grid displaying movie posters
+- **Dark Theme**: Optimized dark theme for comfortable movie browsing
+- **Interactive Elements**: Smooth animations, hover effects, and intuitive navigation
+- **AI Search Interface**: Dedicated interface for natural language movie search
 
-### 📊 Advanced Analytics
+### 📊 Advanced Analytics & Features
 - **Movie Statistics**: Comprehensive database insights and trending analysis
 - **Rating Systems**: Multiple rating sources (IMDb, user ratings, popularity scores)
 - **Genre Analytics**: Detailed breakdowns by genre, year, and rating
-- **Real-time Processing**: Pandas and NumPy for fast data processing
+- **Real-time Processing**: Fast data processing with Pandas and NumPy
 
-### 🔍 Smart Search & Discovery
-- **Natural Language Search**: "Find me sci-fi movies like Blade Runner"
-- **Multi-filter System**: Genre, year, rating, and custom filters
-- **AI-Enhanced Results**: Gemini AI provides context and explanations
-- **Instant Results**: Fast search with intelligent ranking
+### 🔍 Dual Search System
+- **Traditional Search**: Fast keyword-based movie and TV show search
+- **AI-Enhanced Search**: Natural language queries like "Find me sci-fi movies like Blade Runner"
+- **Instant Results**: Quick search with intelligent ranking and filtering
+- **Smart Recommendations**: Click any movie to get AI-powered recommendations
 
 ## 🚀 Quick Start
 
 ### Option 1: Easy Launch (Recommended)
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/CinemaAI-Pro.git
-cd CinemaAI-Pro
+git clone <your-repository-url>
+cd Movie-Recommender-System-Using-Machine-Learning
 
-# Run the startup script
-./start_app.bat  # Windows
+# Run the integrated startup script
+./start_integrated_app.bat  # Windows
 # or
-python -m streamlit run ui/streamlit_app.py
+./start_integrated_app.sh   # Linux/Mac
+
+# Visit http://localhost:5000 in your browser
 ```
 
 ### Option 2: Manual Setup
 ```bash
-# Install dependencies
+# 1. Install Python dependencies
 pip install -r requirements.txt
 
-# Set your Gemini API key (optional but recommended)
-export GEMINI_API_KEY="your-api-key-here"
+# 2. Install Node.js dependencies and build frontend
+cd frontend
+npm install
+npm run build
+cd ..
 
-# Run the application
-streamlit run ui/streamlit_app.py
+# 3. Set your Gemini API key (optional but recommended)
+python set_api_key.py
+
+# 4. Run the Flask server
+python web_server.py
+
+# Visit http://localhost:5000 in your browser
 ```
+
+## 🏗️ Architecture
+
+### Integrated Full-Stack Application
+- **Frontend**: React 18+ with modern UI components, SCSS styling, and responsive design
+- **Backend**: Flask web server providing RESTful API endpoints
+- **ML Engine**: Scikit-learn based recommendation system with pre-computed similarity matrices
+- **AI Integration**: Google Gemini AI for natural language movie search and analysis
+- **Data**: TMDB 5000 movies dataset with comprehensive movie information
+
+### API Endpoints
+- `GET /api/movies` - Paginated movie listings with search and filtering
+- `GET /api/search` - AI-powered and traditional movie search
+- `GET /api/recommendations/{movie_title}` - ML-based movie recommendations
+- `GET /api/stats` - Movie database statistics and analytics
+
+### Frontend Features
+- **Responsive Design**: Mobile-first approach with breakpoint-based layouts
+- **Component Architecture**: Reusable React components for movies, carousels, and search
+- **State Management**: Redux toolkit for global state management
+- **Routing**: React Router for SPA navigation
+- **API Integration**: Axios for HTTP requests with error handling
 
 ## 🔧 Installation & Setup
 

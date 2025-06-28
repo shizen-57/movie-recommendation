@@ -1,0 +1,195 @@
+@import "../../mixins.scss";
+
+.recommendationCard {
+    width: 100%;
+    margin-bottom: 25px;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    .movieCard {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 12px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .posterBlock {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1.5;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+
+            .posterImg {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+
+            .circleRating {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+            }
+
+            .genres {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        .textBlock {
+            color: white;
+            display: flex;
+            flex-direction: column;
+
+            .title {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 5px;
+                line-height: 1.3;
+                @include ellipsis(2);
+            }
+
+            .date {
+                font-size: 14px;
+                opacity: 0.7;
+            }
+        }
+    }
+
+    .recommendationActions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+
+        .recommendBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+        }
+    }
+
+    .recommendationsList {
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        h4 {
+            color: white;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .recommendationsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+
+            .miniCard {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 6px;
+                padding: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    transform: scale(1.02);
+                }
+
+                .miniPoster {
+                    width: 100%;
+                    aspect-ratio: 1 / 1.5;
+                    margin-bottom: 5px;
+                    border-radius: 4px;
+                    overflow: hidden;
+
+                    .miniPosterImg {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                }
+
+                .miniInfo {
+                    display: flex;
+                    flex-direction: column;
+
+                    .miniTitle {
+                        color: white;
+                        font-size: 11px;
+                        font-weight: 500;
+                        line-height: 1.2;
+                        margin-bottom: 2px;
+                        @include ellipsis(2);
+                    }
+
+                    .miniRating {
+                        color: #f0c14b;
+                        font-size: 10px;
+                    }
+                }
+            }
+        }
+    }
+
+    @include md {
+        .movieCard {
+            .textBlock {
+                .title {
+                    font-size: 18px;
+                }
+
+                .date {
+                    font-size: 16px;
+                }
+            }
+        }
+
+        .recommendationActions {
+            .recommendBtn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    }
+}

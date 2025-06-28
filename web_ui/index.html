@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 CinemaAI Pro - Instagram Style</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🎬 CinemaAI Pro</h1>
+            <p class="tagline">Discover your next favorite movie with AI-powered recommendations</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Loading State -->
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading movies...</p>
+            </div>
+
+            <!-- Movies Grid -->
+            <div id="moviesGrid" class="movies-grid">
+                <!-- Movies will be dynamically loaded here -->
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container">
+                <button id="loadMoreBtn" class="load-more-btn">
+                    <i class="fas fa-plus"></i> Load More Movies
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fixed Bottom Search Bar -->
+    <div class="search-bar-container">
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search movies, actors, genres..." 
+                    aria-label="Search movies"
+                />
+                <button id="searchBtn" class="search-btn" aria-label="Search">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <!-- Quick Action Buttons -->
+            <div class="quick-actions">
+                <button class="quick-btn" data-genre="action" title="Action Movies">
+                    <i class="fas fa-fist-raised"></i>
+                </button>
+                <button class="quick-btn" data-genre="comedy" title="Comedy Movies">
+                    <i class="fas fa-laugh"></i>
+                </button>
+                <button class="quick-btn" data-genre="horror" title="Horror Movies">
+                    <i class="fas fa-ghost"></i>
+                </button>
+                <button class="quick-btn" data-genre="romance" title="Romance Movies">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="quick-btn" data-genre="sci-fi" title="Sci-Fi Movies">
+                    <i class="fas fa-rocket"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Modal -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="modalBody" class="modal-body">
+                <!-- Movie details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -5,6 +5,10 @@ numpy
 requests
 Pillow
 
+### Web framework
+flask
+flask-cors
+
 ### AI/ML dependencies  
 google-generativeai
 

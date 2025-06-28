@@ -22,6 +22,10 @@ try:
 except ImportError:
     # Fallback for direct imports
     try:
+        import sys
+        import os
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.append(parent_dir)
         from data_loader import MovieDataLoader
     except ImportError:
         print("Warning: Could not import MovieDataLoader")
@@ -67,53 +71,70 @@ class GeminiMovieRecommender:
         
     def preprocess_data(self):
         """Use pandas and numpy to clean and process the movie data"""
-        if self.movies_data is None or self.ratings_data is None:
+        if self.movies_data is None:
             self.load_sample_movie_data()
         
         if self.movies_data is None:
             print("❌ No movie data available")
             return None
         
-        # Merge movies and ratings if both exist
-        if self.ratings_data is not None and not self.ratings_data.empty:
-            merged_data = pd.merge(self.movies_data, self.ratings_data, on='movieId')
+        # Check if we have TMDB 5000 format (with 'id' column) or sample format (with 'movieId')
+        if 'id' in self.movies_data.columns:
+            # TMDB 5000 format - use as is with some processing
+            processed_data = self.movies_data.copy()
             
-            # Calculate statistical features using numpy
-            movie_stats = merged_data.groupby(['movieId', 'title', 'genres', 'year']).agg({
-                'rating': ['mean', 'count', 'std'],  # user ratings
-                'imdb_rating': 'first'  # IMDb rating
-            }).reset_index()
+            # Ensure required columns exist
+            if 'vote_average' not in processed_data.columns:
+                processed_data['vote_average'] = 6.0  # Default rating
+            if 'popularity' not in processed_data.columns:
+                processed_data['popularity'] = processed_data.get('vote_count', 100)  # Use vote count as popularity proxy
             
-            # Flatten column names
-            movie_stats.columns = ['movieId', 'title', 'genres', 'year', 'avg_user_rating', 'num_ratings', 'rating_std', 'imdb_rating']
-            
-            # Calculate popularity score using numpy
-            movie_stats['popularity_score'] = (
-                movie_stats['avg_user_rating'] * 0.4 + 
-                movie_stats['imdb_rating'] * 0.4 + 
-                np.log1p(movie_stats['num_ratings']) * 0.2
+            # Calculate a simple popularity score
+            processed_data['popularity_score'] = (
+                processed_data.get('vote_average', 6.0) * 0.7 + 
+                np.log1p(processed_data.get('vote_count', 100)) * 0.3
             )
-        else:
-            # Use just movie data if no ratings
-            movie_stats = self.movies_data.copy()
-            if 'vote_average' in movie_stats.columns:
-                movie_stats['avg_user_rating'] = movie_stats['vote_average'] / 2  # Convert 10 scale to 5 scale
-                movie_stats['imdb_rating'] = movie_stats['vote_average']
-            else:
-                movie_stats['avg_user_rating'] = 4.0
-                movie_stats['imdb_rating'] = 8.0
             
-            movie_stats['num_ratings'] = np.random.randint(50, 1000, len(movie_stats))
-            movie_stats['popularity_score'] = movie_stats['avg_user_rating'] * 1.5
+            self.processed_data = processed_data
+            print(f"✅ Processed {len(self.processed_data)} TMDB movies")
+            
+        elif 'movieId' in self.movies_data.columns:
+            # Sample format - use existing logic
+            # Merge movies and ratings if both exist
+            if self.ratings_data is not None and not self.ratings_data.empty:
+                merged_data = pd.merge(self.movies_data, self.ratings_data, on='movieId')
+                
+                # Calculate statistical features using numpy
+                movie_stats = merged_data.groupby(['movieId', 'title', 'genres', 'year']).agg({
+                    'rating': ['mean', 'count', 'std'],  # user ratings
+                    'imdb_rating': 'first'  # IMDb rating
+                }).reset_index()
+                
+                # Flatten column names
+                movie_stats.columns = ['movieId', 'title', 'genres', 'year', 'avg_user_rating', 'num_ratings', 'rating_std', 'imdb_rating']
+                
+                # Calculate popularity score using numpy
+                movie_stats['popularity_score'] = (
+                    movie_stats['avg_user_rating'] * 0.4 + 
+                    movie_stats['imdb_rating'] * 0.4 + 
+                    np.log1p(movie_stats['num_ratings']) * 0.2
+                )
+                
+                self.processed_data = movie_stats
+            else:
+                # No ratings data - work with movies only
+                processed_data = self.movies_data.copy()
+                processed_data['popularity_score'] = processed_data.get('imdb_rating', 6.0)
+                self.processed_data = processed_data
+        else:
+            print("❌ Unknown data format - missing 'id' or 'movieId' column")
+            return None
         
-        # Sort by popularity
-        movie_stats = movie_stats.sort_values('popularity_score', ascending=False)
+        # Sort by popularity score if available
+        if 'popularity_score' in self.processed_data.columns:
+            self.processed_data = self.processed_data.sort_values('popularity_score', ascending=False)
         
-        # Add genre categories
-        movie_stats['genre_list'] = movie_stats['genres'].str.split('|')
-        
-        self.processed_data = movie_stats
-        return movie_stats
+        return self.processed_data
     
     def get_movies_by_genre(self, genre: str, limit: int = 10) -> pd.DataFrame:
         """Filter movies by genre"""
@@ -298,9 +319,82 @@ ANALYSIS:
 """
             
             response = self.model.generate_content(prompt)
+            ai_response_text = response.text
+            
+            # Parse the AI response to extract movie titles and find matching movies
+            lines = ai_response_text.split('\n')
+            recommended_titles = []
+            
+            for line in lines:
+                if line.strip().startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '10.')):
+                    # Extract title between the number and the dash
+                    parts = line.split(' - ', 1)
+                    if len(parts) > 0:
+                        title_part = parts[0]
+                        # Remove the number prefix
+                        title = title_part.split('.', 1)[-1].strip()
+                        # Clean up any extra characters
+                        title = title.replace('[', '').replace(']', '').strip()
+                        recommended_titles.append(title)
+            
+            # Find matching movies from our database
+            movies_list = []
+            if recommended_titles and self.processed_data is not None:
+                for title in recommended_titles:
+                    # Try exact match first
+                    exact_match = self.processed_data[self.processed_data['title'].str.lower() == title.lower()]
+                    if not exact_match.empty:
+                        movie = exact_match.iloc[0]
+                        movies_list.append({
+                            'id': int(movie.get('id', 0)) if pd.notna(movie.get('id')) else 0,
+                            'title': str(movie.get('title', title)),
+                            'overview': str(movie.get('overview', 'No description available')),
+                            'release_date': str(movie.get('release_date', '')),
+                            'vote_average': float(movie.get('vote_average', 0)) if pd.notna(movie.get('vote_average')) else 0,
+                            'vote_count': int(movie.get('vote_count', 0)) if pd.notna(movie.get('vote_count')) else 0,
+                            'genres': str(movie.get('genres', '')),
+                            'popularity': float(movie.get('popularity', 0)) if pd.notna(movie.get('popularity')) else 0
+                        })
+                    else:
+                        # Try partial match
+                        partial_match = self.processed_data[self.processed_data['title'].str.contains(title, case=False, na=False)]
+                        if not partial_match.empty:
+                            movie = partial_match.iloc[0]
+                            movies_list.append({
+                                'id': int(movie.get('id', 0)) if pd.notna(movie.get('id')) else 0,
+                                'title': str(movie.get('title', title)),
+                                'overview': str(movie.get('overview', 'No description available')),
+                                'release_date': str(movie.get('release_date', '')),
+                                'vote_average': float(movie.get('vote_average', 0)) if pd.notna(movie.get('vote_average')) else 0,
+                                'vote_count': int(movie.get('vote_count', 0)) if pd.notna(movie.get('vote_count')) else 0,
+                                'genres': str(movie.get('genres', '')),
+                                'popularity': float(movie.get('popularity', 0)) if pd.notna(movie.get('popularity')) else 0
+                            })
+            
+            # If no movies found from AI recommendations, return some relevant movies based on text search
+            if not movies_list and self.processed_data is not None:
+                # Fallback: text search in titles and overviews
+                text_matches = self.processed_data[
+                    self.processed_data['title'].str.contains(user_query, case=False, na=False) |
+                    self.processed_data['overview'].str.contains(user_query, case=False, na=False)
+                ].head(top_k)
+                
+                for _, movie in text_matches.iterrows():
+                    movies_list.append({
+                        'id': int(movie.get('id', 0)) if pd.notna(movie.get('id')) else 0,
+                        'title': str(movie.get('title', 'Unknown')),
+                        'overview': str(movie.get('overview', 'No description available')),
+                        'release_date': str(movie.get('release_date', '')),
+                        'vote_average': float(movie.get('vote_average', 0)) if pd.notna(movie.get('vote_average')) else 0,
+                        'vote_count': int(movie.get('vote_count', 0)) if pd.notna(movie.get('vote_count')) else 0,
+                        'genres': str(movie.get('genres', '')),
+                        'popularity': float(movie.get('popularity', 0)) if pd.notna(movie.get('popularity')) else 0
+                    })
+            
             return {
                 'query': user_query,
-                'ai_response': response.text,
+                'ai_response': ai_response_text,
+                'movies': movies_list,
                 'total_movies_analyzed': len(sample_movies)
             }
             
