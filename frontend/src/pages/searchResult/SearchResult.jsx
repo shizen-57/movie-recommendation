@@ -2,7 +2,7 @@ import React ,{useState, useEffect} from 'react';
 import "./style.scss"
 import { useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { fetchDataFromApi } from './../../utils/api';
+import { searchMoviesWithAI } from './../../utils/api';
 import ContentWrapper from './../../components/contentWrapper/ContentWrapper';
 import noResults from "../../assets/no-results.png"
 import Spinner from '../../components/spinner/Spinner';
@@ -17,25 +17,21 @@ const SearchResult = () => {
 
   const fetchInitialData = () =>{
     	setLoading(true);
-      fetchDataFromApi(`/search/multi?query=${query}&page=${pageNum}`).then((res)=>{
+      // Use multi-search to include both movies and TV shows
+      searchMoviesWithAI(query, false, 'multi').then((res)=>{
         setData(res)
         setPageNum((prev)=>prev+1)
         setLoading(false)
-      })
+      }).catch((err) => {
+        console.error('Search error:', err);
+        setLoading(false);
+      });
   }
 
   const fetchNextPageData = () =>{
-    setLoading(true);
-      fetchDataFromApi(`/search/multi?query=${query}&page=${pageNum}`).then((res)=>{
-        if(data?.results){
-          setData({
-            ...data, results:[...data?.results, ...res.results]
-          })
-        }else{
-          setData(res)
-        }
-        setPageNum((prev)=>prev+1);
-      })
+    // For now, disable pagination as our backend returns all results at once
+    // This could be enhanced later to support pagination
+    return;
   }
 
   useEffect(()=>{
@@ -48,7 +44,13 @@ const SearchResult = () => {
       {!loading && (<ContentWrapper>
         {data?.results?.length > 0 ?(<>
         <div className="pageTitle">{`Search ${data?.total_results > 1 ? "results" : "result"} of '${query}'`}</div>
-        <InfiniteScroll className='content' dataLength={data?.results?.length || []}>
+        <InfiniteScroll 
+          className='content' 
+          dataLength={data?.results?.length || []}
+          next={fetchNextPageData}
+          hasMore={false} // Disable pagination for now
+          loader={<Spinner/>}
+        >
           {data?.results.map((item,index)=>{
             if(item.media_type === 'person') return;
             return (
@@ -56,8 +58,7 @@ const SearchResult = () => {
               key={index} 
               data={item} 
               fromSearch={true} 
-              next={fetchNextPageData}
-              haseMore={pageNum <= data?.total_pages} loader={<Spinner/>}/>
+              />
             )
           })}
         </InfiniteScroll>

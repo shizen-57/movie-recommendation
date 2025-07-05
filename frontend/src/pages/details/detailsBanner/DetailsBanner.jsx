@@ -51,14 +51,14 @@ const DetailsBanner = ({ video, crew }) => {
                         <div className="content">
                             <div className="left">
                                 {data.poster_path ? (
-                                    <Img className="posterImg" src={url.backdrop+data.poster_path}/>
+                                    <Img className="posterImg" src={url.poster+data.poster_path}/>
                                 ) : (
                                     <Img className="posterImg" src={PosterFallback}/>
                                 )}
                             </div>
                             <div className="right">
                                 <div className="title">
-                                    {`${data.name || data.title} (${dayjs(data?.release_date).format("YYYY")})`}
+                                    {`${data.name || data.title} (${dayjs(data?.release_date || data?.first_air_date).format("YYYY")})`}
                                 </div>
                                 <div className="subtitle">
                                     {data.tagline}
@@ -84,10 +84,10 @@ const DetailsBanner = ({ video, crew }) => {
                                         <span className="text">{data.status}</span>
                                     </div>
                                 ) }
-                                {data.release_date && (
+                                {(data.release_date || data.first_air_date) && (
                                     <div className="infoItem">
-                                        <span className="text bold">Release Date: {""}</span>
-                                        <span className="text">{dayjs(data.release_date).format("MMM D, YYYY")}</span>
+                                        <span className="text bold">{data.release_date ? 'Release Date:' : 'First Air Date:'} {""}</span>
+                                        <span className="text">{dayjs(data.release_date || data.first_air_date).format("MMM D, YYYY")}</span>
                                     </div>
                                 ) }
                                 {data.runtime && (

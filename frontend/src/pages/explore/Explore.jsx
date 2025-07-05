@@ -6,7 +6,7 @@ import Select from "react-select";
 import "./style.scss";
 
 import useFetch from "../../hooks/useFetch";
-import { fetchDataFromApi } from "../../utils/api";
+import { getLocalMovies, getLocalTVShows } from "../../utils/api";
 import ContentWrapper from "../../components/contentWrapper/ContentWrapper";
 import MovieCard from "../../components/movieCard/MovieCard";
 import Spinner from "../../components/spinner/Spinner";
@@ -42,28 +42,94 @@ const Explore = () => {
 
     const fetchInitialData = () => {
         setLoading(true);
-        fetchDataFromApi(`/discover/${mediaType}`, filters).then((res) => {
-            setData(res);
-            setPageNum((prev) => prev + 1);
-            setLoading(false);
-        });
+        
+        const category = 'popular';
+        
+        if (mediaType === 'tv') {
+            // Use TV shows API
+            getLocalTVShows(1, 20, '', '', category).then((res) => {
+                if (res && res.tv_shows) {
+                    const formattedData = {
+                        results: res.tv_shows.map(tvShow => ({
+                            id: tvShow.id,
+                            title: tvShow.title,
+                            overview: tvShow.overview,
+                            poster_path: tvShow.poster_path,
+                            backdrop_path: tvShow.backdrop_path,
+                            release_date: tvShow.release_date || tvShow.year,
+                            vote_average: tvShow.rating,
+                            media_type: mediaType,
+                            genre_ids: [],
+                            genres: tvShow.genres || []
+                        })),
+                        total_results: res.total || 0,
+                        total_pages: Math.ceil((res.total || 0) / 20)
+                    };
+                    setData(formattedData);
+                    setPageNum((prev) => prev + 1);
+                } else {
+                    setData({
+                        results: [],
+                        total_results: 0,
+                        total_pages: 0
+                    });
+                }
+                setLoading(false);
+            }).catch((err) => {
+                console.error('Explore TV fetch error:', err);
+                setData({
+                    results: [],
+                    total_results: 0,
+                    total_pages: 0
+                });
+                setLoading(false);
+            });
+        } else {
+            // Use movies API
+            getLocalMovies(1, 20, '', '', category).then((res) => {
+                if (res && res.movies) {
+                    const formattedData = {
+                        results: res.movies.map(movie => ({
+                            id: movie.id,
+                            title: movie.title,
+                            overview: movie.overview,
+                            poster_path: movie.poster_path,
+                            backdrop_path: movie.backdrop_path,
+                            release_date: movie.release_date || movie.year,
+                            vote_average: movie.rating,
+                            media_type: mediaType,
+                            genre_ids: [],
+                            genres: movie.genres || []
+                        })),
+                        total_results: res.total || 0,
+                        total_pages: Math.ceil((res.total || 0) / 20)
+                    };
+                    setData(formattedData);
+                    setPageNum((prev) => prev + 1);
+                } else {
+                    setData({
+                        results: [],
+                        total_results: 0,
+                        total_pages: 0
+                    });
+                }
+                setLoading(false);
+            }).catch((err) => {
+                console.error('Explore movies fetch error:', err);
+                setData({
+                    results: [],
+                    total_results: 0,
+                    total_pages: 0
+                });
+                setLoading(false);
+            });
+        }
     };
 
     const fetchNextPageData = () => {
-        fetchDataFromApi(
-            `/discover/${mediaType}?page=${pageNum}`,
-            filters
-        ).then((res) => {
-            if (data?.results) {
-                setData({
-                    ...data,
-                    results: [...data?.results, ...res.results],
-                });
-            } else {
-                setData(res);
-            }
-            setPageNum((prev) => prev + 1);
-        });
+        // For now, disable pagination as our backend returns all results at once
+        // This could be enhanced later to support pagination
+        return;
     };
 
     useEffect(() => {
@@ -79,24 +145,17 @@ const Explore = () => {
     const onChange = (selectedItems, action) => {
         if (action.name === "sortby") {
             setSortby(selectedItems);
-            if (action.action !== "clear") {
-                filters.sort_by = selectedItems.value;
-            } else {
-                delete filters.sort_by;
-            }
+            // For now, sorting will be handled on the frontend
+            // TODO: Implement backend sorting
         }
 
         if (action.name === "genres") {
             setGenre(selectedItems);
-            if (action.action !== "clear") {
-                let genreId = selectedItems.map((g) => g.id);
-                genreId = JSON.stringify(genreId).slice(1, -1);
-                filters.with_genres = genreId;
-            } else {
-                delete filters.with_genres;
-            }
+            // For now, genre filtering will be handled on the frontend
+            // TODO: Implement backend genre filtering
         }
 
+        // Re-fetch data when filters change
         setPageNum(1);
         fetchInitialData();
     };
@@ -144,7 +203,7 @@ const Explore = () => {
                                 className="content"
                                 dataLength={data?.results?.length || []}
                                 next={fetchNextPageData}
-                                hasMore={pageNum <= data?.total_pages}
+                                hasMore={false} // Disable pagination for now
                                 loader={<Spinner />}
                             >
                                 {data?.results?.map((item, index) => {

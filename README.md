@@ -1,23 +1,37 @@
-# 🎬 CinemaAI Pro - Advanced Movie Recommendation System with React Frontend
+# 🎬 CinemaAI Pro - AI-Powered Movie Recommendation System
 
-A cutting-edge movie recommendation system powered by Machine Learning and Google's Gemini AI, featuring a beautiful React.js frontend with modern UI/UX design.
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-yellow.svg)](https://python.org/)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI-purple.svg)](https://ai.google.dev/)
+[![TMDB API](https://img.shields.io/badge/TMDB-API-orange.svg)](https://www.themoviedb.org/documentation/api)
 
-![CinemaAI Pro](https://img.shields.io/badge/CinemaAI-Pro-blue?style=for-the-badge&logo=movie)
-![Python](https://img.shields.io/badge/python-3.8+-blue.svg?style=for-the-badge&logo=python)
-![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Flask](https://img.shields.io/badge/Flask-2.0+-000000?style=for-the-badge&logo=flask&logoColor=white)
-![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
+> **CinemaAI Pro** is a modern, AI-powered movie recommendation system that combines machine learning algorithms with natural language processing to provide personalized movie suggestions. Built with React.js and Flask, featuring voice search, Instagram-style UI, and real-time movie data integration.
 
 ## ✨ Features
 
-### 🤖 AI-Powered Recommendations
-- **Gemini AI Integration**: Natural language movie search and intelligent recommendations
-- **Smart Content Filtering**: Advanced algorithms analyze movie preferences and viewing patterns
-- **Personalized Suggestions**: AI learns from your favorites to provide tailored recommendations
-- **Contextual Understanding**: Describe what you want in plain English
+### 🤖 AI-Powered Intelligence
+- **Natural Language Search**: Ask questions like "movies like Inception with complex plots"
+- **Gemini AI Integration**: Advanced understanding of user preferences and context
+- **Smart Recommendations**: Content-based filtering with TF-IDF and cosine similarity
+- **Mood-Based Suggestions**: Get recommendations based on your current mood
 
-### 🎨 Modern React Frontend
-- **Responsive Design**: Beautiful, modern UI built with React 18+ and SCSS
+### 🎤 Voice Search
+- **Hands-Free Interaction**: Speak your movie preferences naturally
+- **Web Speech API**: Real-time speech-to-text conversion
+- **Cross-Browser Support**: Works on modern browsers with graceful fallbacks
+
+### 🎨 Modern UI/UX
+- **Instagram-Style Design**: Sleek, modern interface with glassmorphism effects
+- **Responsive Layout**: Perfect experience on desktop, tablet, and mobile
+- **Interactive Elements**: Smooth animations and micro-interactions
+- **Dark Cinema Theme**: Elegant black and white color scheme
+
+### � Comprehensive Movie Data
+- **Real-Time Integration**: Live data from The Movie Database (TMDB) API
+- **Detailed Information**: Cast, crew, trailers, ratings, and reviews
+- **High-Quality Media**: HD posters, backdrop images, and video content
+- **Multiple Categories**: Popular, trending, top-rated movies and TV shows
 - **Pinterest-Style Layout**: Elegant masonry grid displaying movie posters
 - **Dark Theme**: Optimized dark theme for comfortable movie browsing
 - **Interactive Elements**: Smooth animations, hover effects, and intuitive navigation

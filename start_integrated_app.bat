@@ -32,27 +32,39 @@ if not exist "artifacts\movie_list.pkl" (
 echo 🤖 Setting up Gemini AI API key...
 python set_api_key.py
 
-echo 🚀 Starting Flask backend server on port 8000...
-start "Backend Server" python web_server.py
+echo 🚀 Starting Flask backend server on port 5000...
+start "CinemaAI Backend" cmd /k "python web_server.py"
 
 REM Wait for backend to start
-timeout /t 3 /nobreak >nul
+timeout /t 5 /nobreak >nul
 
 echo 🎨 Starting React frontend development server...
-cd frontend
-start "Frontend Server" npm run dev
+cd ..\react-js-movie-web-application
+if not exist "node_modules" (
+    echo 📦 Installing React dependencies...
+    npm install
+)
+start "CinemaAI Frontend" cmd /k "npm run dev"
 
 echo.
 echo ✅ Application started successfully!
-echo 🎥 Frontend App: http://localhost:5173
-echo 🔌 Backend API: http://localhost:8000
+echo 🎥 Frontend App: http://localhost:5173 (Vite React App)
+echo 🔌 Backend API: http://localhost:5000 (Flask Server)
+echo 🤖 Movie Recommendations: Available via API
+echo 🖼️ Live TMDB Posters: Enabled
 echo.
-echo 🛑 Press any key to stop all services
+echo � How to use:
+echo 1. Wait for both servers to fully load
+echo 2. Open http://localhost:5173 in your browser
+echo 3. Search and get AI-powered movie recommendations!
+echo.
+echo �🛑 Press any key to stop all services
 pause >nul
 
-REM Kill all related processes
-taskkill /f /im python.exe >nul 2>&1
-taskkill /f /im node.exe >nul 2>&1
+echo 🛑 Stopping all services...
+taskkill /f /im python.exe /t >nul 2>&1
+taskkill /f /im node.exe /t >nul 2>&1
+taskkill /f /im cmd.exe /fi "WINDOWTITLE eq CinemaAI*" /t >nul 2>&1
 echo ✅ All services stopped
 
 pause

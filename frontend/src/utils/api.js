@@ -11,16 +11,28 @@ const tmdbHeaders = {
     Authorization: "bearer " + TMDB_TOKEN,
 };
 
-// TMDB API calls (for external movie data)
+// API calls - routes to appropriate backend based on URL
 export const fetchDataFromApi = async (url, params) => {
     try {
-        const { data } = await axios.get(TMDB_BASE_URL + url, {
-            headers: tmdbHeaders,
+        let apiUrl;
+        let headers = {};
+        
+        // Route to local backend for our API endpoints
+        if (url.startsWith('/api/')) {
+            apiUrl = `http://localhost:5000${url}`;
+        } else {
+            // Route to TMDB API for other requests
+            apiUrl = TMDB_BASE_URL + url;
+            headers = tmdbHeaders;
+        }
+        
+        const { data } = await axios.get(apiUrl, {
+            headers,
             params,
         });
         return data;
     } catch (err) {
-        console.log("TMDB API Error:", err);
+        console.log("API Error:", err);
         return err;
     }
 };
@@ -51,13 +63,14 @@ export const getMovieRecommendations = async (movieTitle, count = 10) => {
     }
 };
 
-// AI-powered movie search
-export const searchMoviesWithAI = async (query, useAI = true) => {
+// AI-powered movie and TV show search
+export const searchMoviesWithAI = async (query, useAI = true, mediaType = 'multi') => {
     try {
         const response = await axios.get(`${LOCAL_BASE_URL}/search`, {
             params: { 
                 query, 
-                ai: useAI.toString() 
+                ai: useAI.toString(),
+                media_type: mediaType  // movie, tv, or multi
             }
         });
         return response.data;
@@ -82,6 +95,25 @@ export const getLocalMovies = async (page = 1, perPage = 20, search = '', genre 
         return response.data;
     } catch (err) {
         console.log("Local Movies API Error:", err);
+        return { error: err.message };
+    }
+};
+
+// Get local TV shows with pagination and filtering (from TMDB API)
+export const getLocalTVShows = async (page = 1, perPage = 20, search = '', genre = '', category = 'popular') => {
+    try {
+        const response = await axios.get(`${LOCAL_BASE_URL}/tv`, {
+            params: { 
+                page, 
+                per_page: perPage,
+                search,
+                genre,
+                category  // popular, top_rated, trending
+            }
+        });
+        return response.data;
+    } catch (err) {
+        console.log("Local TV Shows API Error:", err);
         return { error: err.message };
     }
 };

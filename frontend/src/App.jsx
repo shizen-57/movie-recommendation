@@ -26,16 +26,28 @@ function App() {
   },[])//[]-dependency
 
 const fetchApiConfig = () =>{
-  fetchDataFromApi('/configuration')
+  // Use our local backend configuration endpoint instead of external TMDB API
+  fetch('http://localhost:5000/api/configuration')
+    .then(response => response.json())
     .then((res)=>{
-      console.log(res);
+      console.log('Backend configuration:', res);
 
       const url = {
         backdrop: res.images.secure_base_url + "original",
-        poster: res.images.secure_base_url + "original",
+        poster: res.images.secure_base_url + "w500",  // Use w500 for better performance
         profile: res.images.secure_base_url + "original",
       }
 
+      dispatch(getApiConfiguration(url))
+    })
+    .catch(error => {
+      console.error('Error fetching configuration:', error);
+      // Fallback configuration
+      const url = {
+        backdrop: "https://image.tmdb.org/t/p/original",
+        poster: "https://image.tmdb.org/t/p/w500",
+        profile: "https://image.tmdb.org/t/p/original",
+      }
       dispatch(getApiConfiguration(url))
     });
 };
@@ -46,18 +58,22 @@ const genresCall = async ()=>{
   let endPoints = ["tv","movie"];
   let allGenres = {};
 
-  endPoints.forEach((url) =>{
-    promises.push(fetchDataFromApi(`/genre/${url}/list`));
+  endPoints.forEach((endpoint) =>{
+    promises.push(fetchDataFromApi(`/genre/${endpoint}/list`));
   });
 
-  const data = await Promise.all(promises);
-  console.log(data);
-  data.map(({genres}) =>{
-    return genres.map((item)=>(allGenres[item.id] = item));
-  });
+  try {
+    const data = await Promise.all(promises);
+    console.log('Genres data:', data);
+    data.map(({genres}) =>{
+      return genres.map((item)=>(allGenres[item.id] = item));
+    });
 
-  //store genres in redux store
-  dispatch(getGenres(allGenres));
+    //store genres in redux store
+    dispatch(getGenres(allGenres));
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+  }
 };
 
 

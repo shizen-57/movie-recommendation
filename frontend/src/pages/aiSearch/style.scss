@@ -1,5 +1,20 @@
 @import "../../mixins.scss";
 
+@keyframes voicePulse {
+    0% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-50%) scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+}
+
 .aiSearchResultsPage {
     min-height: 700px;
     padding-top: 100px;
@@ -21,52 +36,165 @@
 
         .searchForm {
             display: flex;
-            gap: 10px;
-            max-width: 800px;
+            gap: 15px;
+            max-width: 900px;
             margin: 0 auto;
             flex-direction: column;
+            padding: 0 20px;
 
             @include md {
                 flex-direction: row;
+                padding: 0;
             }
 
-            .searchInput {
+            .searchInputWrapper {
+                position: relative;
                 flex: 1;
-                padding: 15px 20px;
-                font-size: 16px;
-                border: 2px solid rgba(255, 255, 255, 0.1);
-                border-radius: 25px;
-                background: rgba(255, 255, 255, 0.05);
-                color: white;
-                outline: none;
-                transition: all 0.3s ease;
-
-                &::placeholder {
-                    color: rgba(255, 255, 255, 0.6);
+                display: flex;
+                align-items: center;
+                
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: -2px;
+                    left: -2px;
+                    right: -2px;
+                    bottom: -2px;
+                    background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+                    border-radius: 32px;
+                    z-index: -1;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
                 }
+                
+                &:focus-within::before {
+                    opacity: 1;
+                }
+                
+                .searchInput {
+                    width: 100%;
+                    padding: 20px 80px 20px 30px;
+                    font-size: 18px;
+                    border: 2px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 30px;
+                    background: rgba(255, 255, 255, 0.08);
+                    backdrop-filter: blur(20px);
+                    color: white;
+                    outline: none;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    font-weight: 500;
+                    
+                    @include md {
+                        font-size: 20px;
+                        padding: 22px 90px 22px 35px;
+                    }
 
-                &:focus {
-                    border-color: #667eea;
-                    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+                    &::placeholder {
+                        color: rgba(255, 255, 255, 0.6);
+                        font-weight: 400;
+                    }
+
+                    &:focus {
+                        border-color: #667eea;
+                        background: rgba(255, 255, 255, 0.12);
+                        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 12px 40px rgba(102, 126, 234, 0.2);
+                        transform: translateY(-2px);
+                    }
+                    
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.12);
+                        transform: translateY(-1px);
+                    }
+                }
+                
+                .voiceSearchBtn {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    color: white;
+                    font-size: 22px;
+                    cursor: pointer;
+                    padding: 14px;
+                    border-radius: 50%;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex !important;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+                    
+                    @include md {
+                        font-size: 24px;
+                        padding: 16px;
+                        right: 18px;
+                    }
+                    
+                    &:hover {
+                        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+                        transform: translateY(-50%) scale(1.05);
+                        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+                    }
+                    
+                    &:active {
+                        transform: translateY(-50%) scale(0.95);
+                    }
+                    
+                    &.listening {
+                        background: linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%);
+                        animation: voicePulse 1.5s infinite;
+                        box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+                        
+                        &:hover {
+                            background: linear-gradient(135deg, #ff3333 0%, #ff5555 100%);
+                        }
+                    }
                 }
             }
 
             .searchButton {
-                padding: 15px 30px;
+                padding: 20px 35px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 border: none;
-                border-radius: 25px;
-                font-size: 16px;
-                font-weight: 600;
+                border-radius: 30px;
+                font-size: 18px;
+                font-weight: 700;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 white-space: nowrap;
-
-                &:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                
+                @include md {
+                    padding: 22px 40px;
+                    font-size: 18px;
                 }
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                    border-radius: inherit;
+                    z-index: -1;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+                
+                &:hover::before {
+                    opacity: 1;
+                }
+                
+                position: relative;
+                overflow: hidden;
             }
         }
     }

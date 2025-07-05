@@ -12,6 +12,11 @@ flask-cors
 ### AI/ML dependencies  
 google-generativeai
 
+### Voice Search dependencies
+SpeechRecognition
+pyaudio
+pydub
+
 ### Data processing
 scipy
 scikit-learn

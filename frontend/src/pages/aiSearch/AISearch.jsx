@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { MdMic, MdMicOff } from "react-icons/md";
 import dayjs from "dayjs";
 
 import "./style.scss";
@@ -19,6 +20,8 @@ const AISearch = () => {
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState("");
     const [aiResponse, setAiResponse] = useState("");
+    const [isListening, setIsListening] = useState(false);
+    const [recognition, setRecognition] = useState(null);
     const { query: urlParam } = useParams();
     const navigate = useNavigate();
     const { url } = useSelector((state) => state.home);
@@ -64,10 +67,16 @@ const AISearch = () => {
 
     const fetchInitialData = (searchQuery) => {
         setLoading(true);
-        searchMoviesWithAI(searchQuery, true).then((res) => {
+        console.log('🔍 AI Search - Fetching data for query:', searchQuery);
+        // Use multi-search to include both movies and TV shows
+        searchMoviesWithAI(searchQuery, true, 'multi').then((res) => {
+            console.log('🔍 AI Search - Response received:', res);
             setData(res);
             setAiResponse(res.ai_response || "");
             setPageNum(1);
+            setLoading(false);
+        }).catch((error) => {
+            console.error('🔍 AI Search - Error:', error);
             setLoading(false);
         });
     };
@@ -82,6 +91,104 @@ const AISearch = () => {
         fetchInitialData(urlParam);
         setQuery(urlParam);
     }, [urlParam]);
+
+    // Initialize Speech Recognition for AI Search
+    useEffect(() => {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            try {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognitionInstance = new SpeechRecognition();
+                
+                recognitionInstance.continuous = false;
+                recognitionInstance.interimResults = false;
+                recognitionInstance.lang = 'en-US';
+                recognitionInstance.maxAlternatives = 1;
+                
+                recognitionInstance.onstart = () => {
+                    console.log('🎤 AI Voice recognition started');
+                    setIsListening(true);
+                };
+                
+                recognitionInstance.onresult = (event) => {
+                    try {
+                        const transcript = event.results[0][0].transcript;
+                        console.log('🎤 AI Voice recognized:', transcript);
+                        setQuery(transcript);
+                        setIsListening(false);
+                    } catch (error) {
+                        console.error('Error processing AI speech result:', error);
+                        setIsListening(false);
+                    }
+                };
+                
+                recognitionInstance.onerror = (event) => {
+                    console.error('AI Speech recognition error:', event.error);
+                    setIsListening(false);
+                    
+                    // Show user-friendly error messages
+                    switch (event.error) {
+                        case 'no-speech':
+                            alert('No speech detected. Please try again.');
+                            break;
+                        case 'audio-capture':
+                            alert('No microphone found. Please check your microphone.');
+                            break;
+                        case 'not-allowed':
+                            alert('Microphone access denied. Please allow microphone access.');
+                            break;
+                        default:
+                            alert(`Voice recognition error: ${event.error}`);
+                    }
+                };
+                
+                recognitionInstance.onend = () => {
+                    console.log('🎤 AI Voice recognition ended');
+                    setIsListening(false);
+                };
+                
+                setRecognition(recognitionInstance);
+                console.log('✅ AI Speech recognition initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize AI speech recognition:', error);
+            }
+        } else {
+            console.warn('Speech recognition not supported in this browser');
+        }
+    }, []);
+
+    const startVoiceSearch = () => {
+        console.log('🎤 AI Voice search button clicked');
+        console.log('🎤 AI Recognition instance:', recognition);
+        console.log('🎤 AI Current isListening state:', isListening);
+        
+        if (recognition) {
+            try {
+                console.log('🎤 Starting AI voice search...');
+                setIsListening(true);
+                recognition.start();
+            } catch (error) {
+                console.error('Error starting AI voice recognition:', error);
+                setIsListening(false);
+                alert('Failed to start voice recognition. Please try again.');
+            }
+        } else {
+            console.error('❌ AI Voice search not available - recognition instance is null');
+            alert('Voice search is not supported in your browser. Please use Chrome, Edge, or Safari.');
+        }
+    };
+
+    const stopVoiceSearch = () => {
+        if (recognition && isListening) {
+            try {
+                console.log('🎤 Stopping AI voice search...');
+                recognition.stop();
+                setIsListening(false);
+            } catch (error) {
+                console.error('Error stopping AI voice recognition:', error);
+                setIsListening(false);
+            }
+        }
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -98,13 +205,29 @@ const AISearch = () => {
                         🤖 AI-Powered Movie Search
                     </div>
                     <form onSubmit={handleSearch} className="searchForm">
-                        <input
-                            type="text"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Describe what you're looking for... (e.g., 'sci-fi movies like Blade Runner')"
-                            className="searchInput"
-                        />
+                        <div className="searchInputWrapper">
+                            <input
+                                type="text"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Describe what you're looking for... (e.g., 'sci-fi movies like Blade Runner')"
+                                className="searchInput"
+                            />
+                            <button 
+                                type="button"
+                                className={`voiceSearchBtn ${isListening ? 'listening' : ''}`}
+                                onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+                                title={isListening ? 'Stop voice search' : 'Start voice search'}
+                                style={{ 
+                                    pointerEvents: 'auto',
+                                    display: 'flex',
+                                    opacity: 1,
+                                    visibility: 'visible'
+                                }}
+                            >
+                                {isListening ? <MdMicOff /> : <MdMic />}
+                            </button>
+                        </div>
                         <button type="submit" className="searchButton">
                             Search with AI
                         </button>
